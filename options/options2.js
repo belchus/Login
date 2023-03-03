@@ -5,4 +5,6 @@ const sqlite3 = {
     useNullAsDefault: true
 }
 
-export default sqlite3
+module.exports = {
+    sqlite3
+}

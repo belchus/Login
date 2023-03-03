@@ -9,6 +9,6 @@ const mySql = {
 }
 
 
-
-
-export default mySql
+module.exports = {
+    mySql
+}

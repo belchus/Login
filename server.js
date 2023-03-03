@@ -17,9 +17,9 @@ const io = new IOServer(httpServer)
 const cookieParser = require('cookie-parser')
 const session = require('express-session')
 const MongoStore = require('connect-mongo')
-const advancedOptions = { useNewUrlParser: true, useUnifiedTopology: true }
 const mariaDB = require('./options/options');
 const sqlite3 = require('./options/options2')
+const numCPUs = require ('os').cpus().length
 
 app.engine('handlebars', engine({
     defaultLayout: false
@@ -60,6 +60,21 @@ const { PORT } = yargs
     })
     .argv
 
+    if(mode == "CLUSTER") {
+        if(cluster.isMaster) {
+            for(let i = 0; i < numCPUs; i++) {
+                cluster.fork()
+            }
+            console.log(`process ${process.pid}`)
+            cluster.on('exit', (worker, code, signal) => {
+                console.log(` worker ${worker.process.pid} fue cerrado con exito`)
+            })
+        } else {
+            iniciarServidor()
+        }
+    } else {
+        iniciarServidor()
+    }
 
 
 const server = httpServer.listen(PORT, () => console.log(`Servidor HTTP escuchando en puerto ${server.address().port}`))
@@ -178,7 +193,7 @@ function getInfo() {
     const path = process.cwd()
     const id = process.pid
     const info = {
-        args, plat, version, memoria, exe, id, path
+        args, plat, version, memoria, exe, id, path,numCPUs
     }
     return info
 }
